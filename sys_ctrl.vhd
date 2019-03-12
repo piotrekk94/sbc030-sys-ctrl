@@ -38,6 +38,8 @@ signal ramcs_i : std_logic;
 signal pcs_i : std_logic;
 signal dcs_i : std_logic;
 
+signal ecs_i : std_logic;
+
 constant berr_timeout : integer := 16;
 
 signal dsack_i : std_logic;
@@ -62,13 +64,14 @@ begin
 	berr <= not iack;
 
 	dsack0 <= dsack_i when (romcs_i = '0' or ramcs_i = '0') else
-				 'Z' when (pcs_i = '0' or dcs_i = '0') else
+				 'Z' when (pcs_i = '0' or dcs_i = '0' or ecs_i = '0' or cpu_space = '1') else
 				 '1';
 	
 	addr_decode : process(addr, as, ds, cpu_space, rstn)
 	begin
 		pcs_i <= '1';
 		dcs_i <= '1';
+		ecs_i <= '1';
 		scs <= '1';
 		romcs_i <= '1';
 		ramcs_i <= '1';
@@ -79,6 +82,8 @@ begin
 				else
 					scs <= '0';
 				end if;
+			elsif(addr(31 downto 28) = "1110")then
+				ecs_i <= '0';
 			elsif(addr(31 downto 28) = "1111")then
 				case addr(27 downto 26) is
 					when "00" =>
