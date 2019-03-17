@@ -75,7 +75,7 @@ begin
 		scs <= '1';
 		romcs_i <= '1';
 		ramcs_i <= '1';
-		if(as = '0' and ds = '0' and cpu_space = '0' and rstn = '1')then
+		if(as = '0' and cpu_space = '0' and rstn = '1')then
 			if(addr(31 downto 28) = "0000")then
 				if(booted = '0')then
 					romcs_i <= '0';
