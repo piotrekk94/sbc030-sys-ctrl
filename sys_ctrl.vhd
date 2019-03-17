@@ -40,7 +40,7 @@ signal dcs_i : std_logic;
 
 signal ecs_i : std_logic;
 
-constant berr_timeout : integer := 16;
+constant berr_timeout : integer := 64;
 
 signal dsack_i : std_logic;
 
@@ -48,9 +48,14 @@ signal as_d, as_dd : std_logic;
 
 signal booted : std_logic;
 
+signal berr_i : std_logic;
+
 begin
 
-	ipl <= "111" when dirq = '1' else "110";
+	ipl <= "110" when dirq = '0' else
+			 "101" when tirq = '0' else
+			 "100" when mirq = '0' else
+			 "111";
 	
 	romcs <= romcs_i;
 	ramcs <= ramcs_i;
@@ -61,7 +66,7 @@ begin
 	cpu_space <= '1' when fc = "11" else '0';
 	iack <= '1' when cpu_space = '1' and addr(19 downto 16) = "1111" else '0';
 	
-	berr <= not iack;
+	berr <= berr_i;
 
 	dsack0 <= dsack_i when (romcs_i = '0' or ramcs_i = '0') else
 				 'Z' when (pcs_i = '0' or dcs_i = '0' or ecs_i = '0' or cpu_space = '1') else
@@ -129,6 +134,21 @@ begin
 		elsif(rising_edge(clk))then
 			if(cnt = 4)then
 				dsack_i <= '0';
+			else
+				cnt := cnt + 1;
+			end if;
+		end if;
+	end process;
+	
+	berr_gen : process(rstn, as, clk)
+	variable cnt : integer range 0 to berr_timeout;
+	begin
+		if(rstn = '0' or as = '1')then
+			cnt := 0;
+			berr_i <= '1';
+		elsif(rising_edge(clk))then
+			if(cnt = berr_timeout)then
+				berr_i <= '0';
 			else
 				cnt := cnt + 1;
 			end if;
