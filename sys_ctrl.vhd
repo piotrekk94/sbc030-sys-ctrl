@@ -136,7 +136,7 @@ begin
 			cnt := 0;
 			dsack_i <= '1';
 		elsif(rising_edge(clk))then
-			if(cnt = 4)then
+			if(cnt = 7)then
 				dsack_i <= '0';
 			else
 				cnt := cnt + 1;
