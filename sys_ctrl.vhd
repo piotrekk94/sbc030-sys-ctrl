@@ -50,6 +50,8 @@ signal booted : std_logic;
 
 signal berr_i : std_logic;
 
+signal fpu_cs : std_logic;
+
 begin
 
 	ipl <= "110" when dirq = '0' else
@@ -66,7 +68,9 @@ begin
 	cpu_space <= '1' when fc = "11" else '0';
 	iack <= '1' when cpu_space = '1' and addr(19 downto 16) = "1111" else '0';
 	
-	berr <= berr_i;
+	fpu_cs <= '1' when cpu_space = '1' and addr(19 downto 16) = "0010" and as = '0' else '0';
+	
+	berr <= berr_i and (not fpu_cs);
 
 	dsack0 <= dsack_i when (romcs_i = '0' or ramcs_i = '0') else
 				 'Z' when (pcs_i = '0' or dcs_i = '0' or ecs_i = '0' or cpu_space = '1') else
